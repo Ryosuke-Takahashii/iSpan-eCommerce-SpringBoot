@@ -1,2 +1,2 @@
 # iSpan-eCommerce-SpringBoot
-一個使用SpringBoot框架的MVC模式電商專案
+因為不太會用VUE3，先用MVC模式寫寫看

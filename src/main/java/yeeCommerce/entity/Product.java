@@ -1,14 +1,6 @@
 package yeeCommerce.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,26 +16,33 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Integer productId;
 
+    @Column(name = "product_name", nullable = false, length = 100)
     private String productName;
 
+    @Column(name = "product_description", length = 2000)
     private String productDescription;
 
+    @Column(name = "product_price", nullable = false)
     private Integer productPrice;
 
+    @Column(name = "product_stock", nullable = false)
     private Integer productStock;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_category_id")
-    private Category productCategory;  // 對應 Category 類中的 categoryId
+    @JoinColumn(name = "product_category_id", nullable = false)
+    private Category productCategory;  // 與 Category 表的關聯
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id")
-    private User seller;  // 對應 User 類中的 memberId
+    @JoinColumn(name = "p_shop_id", nullable = false)
+    private Shop shop;  // 與 Shop 表的關聯
 
     @Lob
-    private byte[] productPhoto;  // varbinary(max) 對應 byte[]
+    @Column(name = "product_photo")
+    private byte[] productPhoto;
 
+    @Column(name = "product_status")
     private Integer productStatus;
 }

@@ -4,15 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import yeeCommerce.entity.Product;
 import yeeCommerce.repository.ProductRepository;
 
 @Service
 public class ProductService {
-
-    @Autowired
-    private ProductRepository productRepository;
+	@Autowired
+    private final ProductRepository productRepository;
+    
+	
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     // 根據產品名稱查詢，並支持分頁
     public Page<Product> getProductsByName(String productName, Pageable pageable) {
@@ -20,7 +23,7 @@ public class ProductService {
     }
 
     // 根據產品類別查詢，並支持分頁
-    public Page<Product> getProductsByCategory(Integer categoryId, Pageable pageable) {
+    public Page<Product> getProductsByCategoryId(Integer categoryId, Pageable pageable) {
         return productRepository.findByProductCategory_CategoryId(categoryId, pageable);
     }
 
@@ -34,30 +37,50 @@ public class ProductService {
         return productRepository.findByProductNameAndProductPriceBetween(productName, minPrice, maxPrice, pageable);
     }
 
-    // 根據賣家ID和類別ID查詢，並支持分頁
-    public Page<Product> getProductsBySellerAndCategory(Integer sellerId, Integer categoryId, Pageable pageable) {
-        return productRepository.findBySeller_MemberIdAndProductCategory(sellerId, categoryId, pageable);
-    }
-
-    // 根據賣家ID和產品庫存查詢，並支持分頁
-    public Page<Product> getProductsBySellerAndStock(Integer sellerId, Integer stock, Pageable pageable) {
-        return productRepository.findBySeller_MemberIdAndProductStockGreaterThan(sellerId, stock, pageable);
-    }
-
-    // 根據描述中的關鍵字查詢，並支持分頁
-    public Page<Product> getProductsByDescription(String keyword, Pageable pageable) {
+    // 根據產品描述中的關鍵字查詢，並支持分頁
+    public Page<Product> getProductsByDescriptionKeyword(String keyword, Pageable pageable) {
         return productRepository.findByProductDescriptionContaining(keyword, pageable);
     }
 
-    // 根據賣家ID和價格範圍查詢，並支持分頁
-    public Page<Product> getProductsBySellerAndPriceRange(Integer sellerId, Integer minPrice, Integer maxPrice, Pageable pageable) {
-        return productRepository.findBySeller_MemberIdAndProductPriceBetween(sellerId, minPrice, maxPrice, pageable);
+    // 根據 categoryName 查詢商品，並支持分頁
+    public Page<Product> getProductsByCategoryName(String categoryName, Pageable pageable) {
+        return productRepository.findByCategoryNameContaining(categoryName, pageable);
+    }
+
+    // 根據 storeName 查詢商品，並支持分頁
+    public Page<Product> getProductsByStoreName(String storeName, Pageable pageable) {
+        return productRepository.findByStoreNameContaining(storeName, pageable);
+    }
+
+    // 根據 categoryName 和價格範圍查詢商品，並支持分頁
+    public Page<Product> getProductsByCategoryNameAndPriceRange(String categoryName, Integer minPrice, Integer maxPrice, Pageable pageable) {
+        return productRepository.findByCategoryNameAndPriceBetween(categoryName, minPrice, maxPrice, pageable);
+    }
+
+    // 根據 productName 進行模糊查詢，並支持分頁
+    public Page<Product> getProductsByNameContaining(String productName, Pageable pageable) {
+        return productRepository.findByProductNameContaining(productName, pageable);
     }
 
     // 根據名稱、描述、狀態進行模糊查詢，並支持分頁
-    public Page<Product> searchProducts(String name, String description, Pageable pageable) {
+    public Page<Product> searchProductsByNameAndDescriptionAndStatus(String name, String description, Pageable pageable) {
         return productRepository.searchProductsByNameAndDescriptionAndStatus(name, description, pageable);
     }
     
-    //abcdefg
+    public Page<Product> getProducts(String categoryName, String storeName, Integer minPrice, Integer maxPrice, Pageable pageable) {
+        // 根據前端傳來的查詢條件進行處理
+        if (categoryName != null && storeName != null && minPrice != null && maxPrice != null) {
+            return productRepository.findByCategoryNameAndPriceBetween(categoryName, minPrice, maxPrice, pageable);
+        } else if (categoryName != null && minPrice != null && maxPrice != null) {
+            return productRepository.findByCategoryNameAndPriceBetween(categoryName, minPrice, maxPrice, pageable);
+        } else if (categoryName != null) {
+            return productRepository.findByCategoryNameContaining(categoryName, pageable);
+        } else if (storeName != null) {
+            return productRepository.findByStoreNameContaining(storeName, pageable);
+        } else if (minPrice != null && maxPrice != null) {
+            return productRepository.findByProductPriceBetween(minPrice, maxPrice, pageable);
+        } else {
+            return productRepository.findAll(pageable); // 如果沒傳遞任何查詢條件，返回所有商品
+        }
+    }
 }
